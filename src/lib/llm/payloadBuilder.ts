@@ -8,16 +8,21 @@ export function buildGeminiParts(inputs: LLMInput[]): GeminiPart[] {
   const parts: GeminiPart[] = [];
 
   for (const input of inputs) {
+  
     if (input.type === "system") {
-      parts.push({ text: input.value });
+      parts.push({
+        text: `SYSTEM INSTRUCTIONS:\n${input.value}`,
+      });
     }
-  }
 
-  for (const input of inputs) {
+ 
     if (input.type === "text") {
-      parts.push({ text: input.value });
+      parts.push({
+        text: input.value,
+      });
     }
 
+  
     if (input.type === "image") {
       parts.push({
         inlineData: {
@@ -28,6 +33,10 @@ export function buildGeminiParts(inputs: LLMInput[]): GeminiPart[] {
         },
       });
     }
+  }
+
+  if (!parts.length) {
+    throw new Error("No Gemini parts built");
   }
 
   return parts;

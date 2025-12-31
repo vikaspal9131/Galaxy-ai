@@ -43,14 +43,12 @@ export async function POST(req: Request) {
 
     output = output.trim();
 
-    return NextResponse.json({
-      success: true,
-      output,
-    });
+    return NextResponse.json({ output });
   } catch (err: any) {
     const message =
       typeof err?.message === "string" ? err.message.toLowerCase() : "";
 
+    // 🔥 API LIMIT / QUOTA / RATE LIMIT
     if (
       message.includes("quota") ||
       message.includes("rate limit") ||
@@ -59,11 +57,9 @@ export async function POST(req: Request) {
     ) {
       return NextResponse.json(
         {
-          success: false,
           error: "RATE_LIMIT",
           message:
             "API limit reached. Please wait for quota to refill and try again.",
-          retryAfter: "quota_refill",
         },
         { status: 429 }
       );
@@ -71,11 +67,7 @@ export async function POST(req: Request) {
 
     if (err instanceof ConfigError) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "CONFIG_ERROR",
-          message: err.message,
-        },
+        { error: "CONFIG_ERROR", message: err.message },
         { status: 500 }
       );
     }
@@ -83,11 +75,9 @@ export async function POST(req: Request) {
     if (err instanceof LLMExecutionError) {
       return NextResponse.json(
         {
-          success: false,
           error: "LLM_ERROR",
           message:
             "The AI service is temporarily unavailable. Please try again later.",
-          retryable: true,
         },
         { status: 502 }
       );
@@ -95,10 +85,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        success: false,
         error: "SERVER_ERROR",
         message: "Something went wrong. Please try again later.",
-        retryable: false,
       },
       { status: 500 }
     );
