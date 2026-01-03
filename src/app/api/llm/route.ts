@@ -11,19 +11,38 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        {
-          error: "VALIDATION_ERROR",
-          details: parsed.error.format(),
-        },
+        { error: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
 
     const model = getGeminiModel();
-    const parts = buildGeminiParts(parsed.data.inputs);
 
+    const systemInput = parsed.data.inputs.find(
+      (i) => i.type === "system"
+    );
+
+    const userInputs = parsed.data.inputs.filter(
+      (i) => i.type !== "system"
+    );
+
+    const parts: any[] = [];
+
+    if (systemInput && systemInput.type === "system") {
+      parts.push({
+        text: `SYSTEM INSTRUCTION:\n${systemInput.value}\n\n---\n`,
+      });
+    }
+
+    parts.push(...buildGeminiParts(userInputs));
+    
     const result = await model.generateContent({
-      contents: [{ role: "user", parts }],
+      contents: [
+        {
+          role: "user",
+          parts,
+        },
+      ],
       generationConfig: {
         temperature: 0.4,
         maxOutputTokens: 4096,
@@ -41,19 +60,17 @@ export async function POST(req: Request) {
       }
     }
 
-    output = output.trim();
-
-    return NextResponse.json({ output });
+    return NextResponse.json({ output: output.trim() });
   } catch (err: any) {
+    console.error("GEMINI ERROR:", err);
+
     const message =
       typeof err?.message === "string" ? err.message.toLowerCase() : "";
 
-    // 🔥 API LIMIT / QUOTA / RATE LIMIT
     if (
       message.includes("quota") ||
       message.includes("rate limit") ||
-      message.includes("resource exhausted") ||
-      message.includes("limit")
+      message.includes("resource exhausted")
     ) {
       return NextResponse.json(
         {
@@ -86,7 +103,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: "SERVER_ERROR",
-        message: "Something went wrong. Please try again later.",
+        message: err?.message || "Unknown server error",
       },
       { status: 500 }
     );

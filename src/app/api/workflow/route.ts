@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const USER_ID = "demo-user"; // assignment ke liye enough
+const USER_ID = "demo-user"; 
 
 export async function GET() {
   let workflow = await prisma.workflow.findUnique({
@@ -28,7 +28,7 @@ export async function PUT(req: Request) {
   await prisma.workflow.upsert({
     where: { userId: USER_ID },
     update: {
-      ...(name ? { name } : {}), // 🔑 IMPORTANT
+      ...(name ? { name } : {}), 
       nodes,
       edges,
     },

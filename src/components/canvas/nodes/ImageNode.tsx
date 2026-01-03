@@ -65,7 +65,7 @@ export function ImageNode({ id, data }: any) {
 
   return (
     <>
-      {/* ✅ FULL SCREEN CLICK CATCHER — PORTAL */}
+ 
       {menuOpen &&
         createPortal(
           <div

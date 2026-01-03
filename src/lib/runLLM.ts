@@ -59,7 +59,7 @@ export async function runLLM({
 
   const payload = {
     inputs,
-    system: systemPrompt, // 🔥 backend expects this
+    system: systemPrompt, 
   };
 
  

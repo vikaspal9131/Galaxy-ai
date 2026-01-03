@@ -26,6 +26,5 @@ export function stripMarkdown(text: string) {
     // horizontal rules
     .replace(/^\s*[-*_]{3,}\s*$/gm, "");
 
-    // ❌ NO trim
-    // ❌ NO newline normalization
+   
 }
